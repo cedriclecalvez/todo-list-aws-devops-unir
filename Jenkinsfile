@@ -36,6 +36,7 @@ pipeline {
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
                     rm -rf samconfig.toml
+                    rm -rf temlplate.yaml
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
