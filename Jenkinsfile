@@ -45,6 +45,7 @@ pipeline {
                        --region us-east-1 \
                        --parameter-overrides Stage="staging" AllowUnauthenticated="true" \
                        --no-confirm-changeset \
+                       --force-upload
                 '''
             }
         }
