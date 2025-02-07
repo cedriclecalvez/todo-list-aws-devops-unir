@@ -32,7 +32,6 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withAWS(credentials:'aws-credentials', region: 'us-east-1') {
                     sh'''
                         sam build
                         sam validate
@@ -43,7 +42,6 @@ pipeline {
                                    --parameter-overrides Stage="staging" \
                                    --no-confirm-changeset \
                     '''
-                }
             }
         }
 
