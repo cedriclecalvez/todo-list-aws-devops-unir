@@ -4,7 +4,7 @@ pipeline {
      stages {
         stage('Get Code') {
             steps {
-                git 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                git branch: 'dev', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
             }
         }
 
