@@ -35,14 +35,14 @@ pipeline {
                     sh '''
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
-                     rm -rf samconfig.toml
+                    rm -rf samconfig.toml
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
                        --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
-                       --parameter-overrides Stage="staging" \
+                       --parameter-overrides Stage="staging" AllowUnauthenticated="true" \
                        --no-confirm-changeset
                 '''
             }
