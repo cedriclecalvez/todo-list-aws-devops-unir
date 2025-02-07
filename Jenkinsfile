@@ -36,6 +36,7 @@ pipeline {
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
                     aws cloudformation delete-stack --stack-name todo-list-aws-staging --region us-east-1 || true
+                    aws dynamodb delete-table --table-name TodosDynamoDbTable-staging --region us-east-1 || true
                     rm -rf .aws-sam samconfig.toml
 
                     sam build
