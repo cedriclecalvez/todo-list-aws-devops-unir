@@ -38,7 +38,7 @@ pipeline {
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
-                       --resolve-s3
+                       --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
                        --parameter-overrides Stage="staging" \
