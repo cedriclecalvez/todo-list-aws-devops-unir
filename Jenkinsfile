@@ -1,20 +1,20 @@
 pipeline {
     agent any
 
-     stages {
+    stages {
         stage('Get Code') {
             steps {
                 git branch: 'dev', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
             }
         }
 
-        stage('Static Tests'){
-            parallel{
+        stage('Static Tests') {
+            parallel {
                 stage('Flake8') {
                     steps {
                         sh '''
                             python3 -m flake8 --exit-zero --format=pylint src >flake8.out
-                        '''   
+                        '''
                         recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')]
                     }
                 }
@@ -26,10 +26,27 @@ pipeline {
                         '''
                         recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
                     }
-                } 
-            }    
-        }   
-        
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                withAWS(credentials:'aws-credentials', region: 'us-east-1') {
+                    sh'''
+                        sam build
+                        sam validate
+                        sam deploy --stack-name todo-list-aws-staging \
+                                   --s3-prefix todo-list-aws \
+                                   --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+                                   --region us-east-1 \
+                                   --parameter-overrides Stage="staging" \
+                                   --no-confirm-changeset \
+                    '''
+                }
+            }
+        }
+
         // stage('Unit') {
         //     steps {
         //         sh '''
@@ -51,7 +68,7 @@ pipeline {
         //             pytest --junitxml=result-rest.xml test/rest
         //         '''
         //         junit 'result-rest.xml'
-        //     }    
+        //     }
         // }
 
         // stage('Cobertura') {
@@ -73,11 +90,11 @@ pipeline {
         //             start flask run
 
         //             ping 127.0.0.1 -n 15
-                    
-        //             C:/UNIR/Ejercicios/apache-jmeter-5.5/bin/jmeter -n -t test/jmeter/flask.jmx -f -l flask.jtl
-        //         '''
-        //         perfReport sourceDataFiles: 'flask.jtl'
-        //     }
-        // }  
+
+    //             C:/UNIR/Ejercicios/apache-jmeter-5.5/bin/jmeter -n -t test/jmeter/flask.jmx -f -l flask.jtl
+    //         '''
+    //         perfReport sourceDataFiles: 'flask.jtl'
+    //     }
+    // }
     }
 }
