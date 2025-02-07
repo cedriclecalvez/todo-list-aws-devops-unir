@@ -11,7 +11,7 @@ pipeline {
         stage('Flake8') {
             steps {
                 sh '''
-                    python3 -m flake8 --exit-zero --format=pylint app >flake8.out
+                    python -m flake8 --exit-zero --format=pylint app >flake8.out
                 '''   
                 recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')], qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]]
             }
@@ -20,7 +20,7 @@ pipeline {
         stage('Security') {
             steps {
                 sh '''
-                    python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
+                    python -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
                 '''
                 recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')], qualityGates: [[threshold: 2, type: 'TOTAL', unstable: true], [threshold: 4, type: 'TOTAL', unstable: false]]
             }
@@ -30,7 +30,7 @@ pipeline {
             steps {
                 sh '''
                     export PYTHONPATH=%WORKSPACE%
-                    python3 -m pytest --junitxml=result-unit.xml test/unit
+                    python -m pytest --junitxml=result-unit.xml test/unit
                 '''
                 junit 'result-unit.xml'
             }
