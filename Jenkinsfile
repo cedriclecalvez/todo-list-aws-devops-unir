@@ -33,6 +33,7 @@ pipeline {
         stage('Deploy') {
             steps {
                     sh'''
+                        export AWS_REGION=us-east-1
                         sam build
                         sam validate
                         sam deploy --stack-name todo-list-aws-staging \
