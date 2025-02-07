@@ -37,13 +37,13 @@ pipeline {
                     export AWS_DEFAULT_REGION=us-east-1
                     sam build
                     sam validate --region us-east-1
-                    sam deploy --stack-name todo-list-aws-staging \
-                                --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-vshqibshnvdv \
-                               --s3-prefix todo-list-aws \
-                               --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-                               --region us-east-1 \
-                               --parameter-overrides Stage="staging" \
-                               --no-confirm-changeset
+                     sam deploy --stack-name todo-list-aws-staging \
+                       --resolve-s3 \
+                       --s3-prefix todo-list-aws \
+                       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+                       --region us-east-1 \
+                       --parameter-overrides Stage="staging" \
+                       --no-confirm-changeset
                 '''
             }
         }
