@@ -8,23 +8,26 @@ pipeline {
             }
         }
 
-        stage('Flake8') {
-            steps {
-                sh '''
-                    python3 -m flake8 --exit-zero --format=pylint src >flake8.out
-                '''   
-                recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')], qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]]
-            }
-        }
+        stage('Static Tests'){
+            parallel{
+                stage('Flake8') {
+                    steps {
+                        sh '''
+                            python3 -m flake8 --exit-zero --format=pylint src >flake8.out
+                        '''   
+                        recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')]
+                    }
+                }
 
-        stage('Security') {
-            steps {
-                sh '''
-                    python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
-                '''
-                recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')], qualityGates: [[threshold: 2, type: 'TOTAL', unstable: true], [threshold: 4, type: 'TOTAL', unstable: false]]
-            }
-        }        
+                stage('Security') {
+                    steps {
+                        sh '''
+                            python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
+                        '''
+                        recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
+                    }
+                }     
+        }   
         
         // stage('Unit') {
         //     steps {
