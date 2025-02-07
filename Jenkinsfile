@@ -39,6 +39,7 @@ pipeline {
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
+                     --template-file src/template.yml \
                        --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-vshqibshnvdv \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
