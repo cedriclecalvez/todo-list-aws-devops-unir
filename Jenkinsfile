@@ -11,6 +11,7 @@ pipeline {
         stage('Flake8') {
             steps {
                 sh '''
+                export PATH=$HOME/.local/bin:$PATH
                     python -m flake8 --exit-zero --format=pylint app >flake8.out
                 '''   
                 recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')], qualityGates: [[threshold: 8, type: 'TOTAL', unstable: true], [threshold: 10, type: 'TOTAL', unstable: false]]
@@ -20,6 +21,7 @@ pipeline {
         stage('Security') {
             steps {
                 sh '''
+                export PATH=$HOME/.local/bin:$PATH
                     python -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
                 '''
                 recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')], qualityGates: [[threshold: 2, type: 'TOTAL', unstable: true], [threshold: 4, type: 'TOTAL', unstable: false]]
