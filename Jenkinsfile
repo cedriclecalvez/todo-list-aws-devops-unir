@@ -32,15 +32,13 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                cleanWs()
                     sh '''
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
-                     --template-file src/template.yml \
-                       --s3-bucket aws-sam-cli-managed-default-samclisourcebucket-vshqibshnvdv \
+                       --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
                        --parameter-overrides Stage="staging" \
