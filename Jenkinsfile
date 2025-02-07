@@ -26,7 +26,8 @@ pipeline {
                         '''
                         recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
                     }
-                }     
+                } 
+            }    
         }   
         
         // stage('Unit') {
