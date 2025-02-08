@@ -38,7 +38,6 @@ pipeline {
                     aws cloudformation delete-stack --stack-name todo-list-aws-staging --region us-east-1 || true
                     aws dynamodb delete-table --table-name staging-TodosDynamoDbTable --region us-east-1 || true
                     rm -rf .aws-sam samconfig.toml
-
                     sam build
                     sam validate --region us-east-1
                      sam deploy --stack-name todo-list-aws-staging \
