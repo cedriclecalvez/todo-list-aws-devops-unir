@@ -50,54 +50,18 @@ pipeline {
             }
         }
 
-        // stage('Unit') {
-        //     steps {
-        //         sh '''
-        //             export PYTHONPATH=%WORKSPACE%
-        //             python3 -m pytest --junitxml=result-unit.xml test/unit
-        //         '''
-        //         junit 'result-unit.xml'
-        //     }
-        // }
-
-        // stage('Rest') {
-        //     steps {
-        //         sh '''
-        //             export FLASK_APP=app/api.py
-        //             start flask run -p 5001
-        //             start java -jar C:/Unir/Ejercicios/wiremock-jre8-standalone-2.28.0.jar --port 9090 --root-dir test/wiremock
-        //             export PYTHONPATH=.
-        //             ping 127.0.0.1 -n 15
-        //             pytest --junitxml=result-rest.xml test/rest
-        //         '''
-        //         junit 'result-rest.xml'
-        //     }
-        // }
-
-        // stage('Cobertura') {
-        //     steps {
-        //         sh '''
-        //             coverage xml
-        //         '''
-        //         catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-        //             cobertura coberturaReportFile: 'coverage.xml', conditionalCoverageTargets: '100,0,80', lineCoverageTargets: '100,0,85', onlyStable: false, failUnstable: false
-        //         }
-        //     }
-        // }
-
-        // stage('Performance') {
-        //     steps {
-        //         sh '''
-        //             export FLASK_APP=app/api.py
-        //             export FLASK_ENV=development
-        //             start flask run
-
-        //             ping 127.0.0.1 -n 15
-
-    //             C:/UNIR/Ejercicios/apache-jmeter-5.5/bin/jmeter -n -t test/jmeter/flask.jmx -f -l flask.jtl
-    //         '''
-    //         perfReport sourceDataFiles: 'flask.jtl'
-    //     }
-    // }
+        stage('Rest Tests') {
+            steps {
+                def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
+                        returnStdout: true)
+                    echo "$BASE_URL"
+                    echo 'Initiating Integration Tests'
+                    sh "bash pipelines/common-steps/integration.sh $BASE_URL"
+                sh '''
+                    python3 -m pytest --junitxml=result-unit.xml test/integration
+                '''
+                junit 'result-unit.xml'
+            }
+        }
     }
 }
