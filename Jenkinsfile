@@ -45,7 +45,7 @@ pipeline {
                        --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
-                       --parameter-overrides Stage="staging" DynamoDBTableName="TodosDynamoDbTable" \
+                       --parameter-overrides Stage="staging" \
                        --no-confirm-changeset \
                        --force-upload
                 '''
