@@ -52,11 +52,11 @@ pipeline {
 
         stage('Rest Tests') {
             steps {
-                def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                        returnStdout: true)
-                    echo "$BASE_URL"
-                    echo 'Initiating Integration Tests'
-                    sh "bash pipelines/common-steps/integration.sh $BASE_URL"
+                // def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
+                //         returnStdout: true)
+                //     echo "$BASE_URL"
+                //     echo 'Initiating Integration Tests'
+                //     sh "bash pipelines/common-steps/integration.sh $BASE_URL"
                 sh '''
                     python3 -m pytest --junitxml=result-unit.xml test/integration
                 '''
