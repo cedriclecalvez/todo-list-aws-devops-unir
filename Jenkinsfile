@@ -44,7 +44,8 @@ pipeline {
                        --region us-east-1 \
                        --parameter-overrides Stage="staging" \
                        --no-confirm-changeset \
-                       --force-upload
+                       --force-upload \
+                       --no-fail-on-empty-changeset
                 '''
             }
         }
