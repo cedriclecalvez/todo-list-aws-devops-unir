@@ -57,7 +57,7 @@ pipeline {
                     returnStdout: true)
                     echo "API Base URL: ${BASE_URL}"
                     echo 'Initiating Integration Tests'
-                     sh """
+                    sh """
                         export BASE_URL="${baseUrl}"
                         python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py
                     """
@@ -67,3 +67,4 @@ pipeline {
             }
         }
     }
+}
