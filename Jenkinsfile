@@ -65,11 +65,38 @@ pipeline {
                 junit 'result-integration.xml'
             }
         }
+        stage('Promote') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
+                        sh '''
+                            git config user.email "jenkins@ci.local CP1.4"
+                            git config user.name "Jenkins CI Cedric CP1.4"
+                            git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                            git checkout master
+                            git pull origin master
+                            git merge --no-ff dev -m "Promoting version from dev to master"
+                            git push origin master
+                        '''
+                    }
+                }
+            }
+        }
     }
     post {
         always {
-            echo 'Clean env: delete dir'
+            archiveArtifacts artifacts: '**/*.xml', fingerprint: true
+            echo 'Artifacts archived.'
+        }
+        success {
             cleanWs()
+            echo 'Cleaning done'
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            cleanWs()
+            echo 'Cleaning done'
+            echo 'Pipeline failed.'
         }
     }
 }
