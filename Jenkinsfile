@@ -58,7 +58,7 @@ pipeline {
                     echo "API Base URL: ${BASE_URL}"
                     echo 'Initiating Integration Tests'
                     sh """
-                        export BASE_URL="${BASE_URL}"
+                        export BASE_URL="${BASE_URL}/todos"
                         python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py
                     """
                 }
