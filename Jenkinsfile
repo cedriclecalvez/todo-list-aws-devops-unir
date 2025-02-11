@@ -42,7 +42,7 @@ pipeline {
                        --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
-                       --parameter-overrides Stage="staging" \
+                       --parameter-overrides Stage="staging" Auth="NONE"\
                        --no-confirm-changeset \
                        --force-upload \
                        --no-fail-on-empty-changeset
