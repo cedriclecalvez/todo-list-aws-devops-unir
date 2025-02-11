@@ -40,9 +40,9 @@ pipeline {
                     sam validate --region us-east-1
                     sam deploy --stack-name todo-list-aws-staging \
                        --resolve-s3 \
-                       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+                       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
                        --region us-east-1 \
-                       --parameter-overrides Stage="staging" Auth="NONE"\
+                       --parameter-overrides Stage="staging" \
                        --no-confirm-changeset \
                        --force-upload \
                        --no-fail-on-empty-changeset
@@ -65,6 +65,12 @@ pipeline {
 
                 junit 'result-integration.xml'
             }
+        }
+    }
+    post {
+        always {
+            echo 'Clean env: delete dir'
+            cleanWs()
         }
     }
 }
