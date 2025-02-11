@@ -38,7 +38,7 @@ pipeline {
                     rm -rf .aws-sam samconfig.toml
                     sam build
                     sam validate --region us-east-1
-                     sam deploy --stack-name todo-list-aws-staging \
+                    sam deploy --stack-name todo-list-aws-staging \
                        --resolve-s3 \
                        --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
                        --region us-east-1 \
@@ -53,19 +53,21 @@ pipeline {
         stage('Rest Tests') {
             steps {
                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                        returnStdout: true)
-                    echo "$BASE_URL"
+                    // def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
+                    //     returnStdout: true)
+                    def BASE_URL = sh(script:  "aws cloudformation describe - stacks - stack - name todo - list - aws - staging \
+                        --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' \
+                        -- region us - east - 1 - output text", returnStdout: true)
+                    echo "API Base URL: ${BASE_URL}"
                     echo 'Initiating Integration Tests'
                     sh "bash test/integration/integration.sh $BASE_URL"
                     sh "BASE_URL=${BASE_URL} pytest --junitxml=result-integration.xml test/integration"
-        }
-                //     sh '''
-                //     export PYTHONPATH=${WORKSPACE}
-                //     python3 -m pytest --junitxml=result-unit.xml test/integration
-                // '''
-                    junit 'result-unit.xml'
                 }
+                    //     sh '''
+                    //     export PYTHONPATH=${WORKSPACE}
+                    //     python3 -m pytest --junitxml=result-unit.xml test/integration
+                    // '''
+                junit 'result-unit.xml'
             }
         }
     }
