@@ -56,9 +56,11 @@ pipeline {
                     def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
                     returnStdout: true)
                     echo "API Base URL: ${BASE_URL}"
-                    export BASE_URL = ${ BASE_URL }
                     echo 'Initiating Integration Tests'
-                    sh 'python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py'
+                     sh """
+                        export BASE_URL="${baseUrl}"
+                        python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py
+                    """
                 }
 
                 junit 'result-integration.xml'
