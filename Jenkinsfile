@@ -52,23 +52,16 @@ pipeline {
 
         stage('Rest Tests') {
             steps {
-                    // catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    script {
-                        // def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                        // returnStdout: true)
-                        // echo "API Base URL: ${BASE_URL}"
-                        // echo 'Initiating Integration Tests'
-                        // sh "BASE_URL=${BASE_URL} python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py'
-                        sh'''
-                        BASE_URL=$(aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text)
-                        python3 -m pytest --junitxml=result-integration.xml --base-url="$BASE_URL" test/integration/todoApiTest.py
-
-                        '''
-                    }
-                // }
+                script {
+                    def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
+                    returnStdout: true)
+                    echo "API Base URL: ${BASE_URL}"
+                    export BASE_URL = ${ BASE_URL }
+                    echo 'Initiating Integration Tests'
+                    sh 'python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py'
+                }
 
                 junit 'result-integration.xml'
             }
         }
     }
-}
