@@ -56,14 +56,12 @@ pipeline {
                     def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
                     returnStdout: true).trim()
                     echo "API Base URL: ${BASE_URL}"
-                    echo "env jenkins => Using BASE_URL: \$BASE_URL"
                     echo 'Initiating Integration Tests'
                     sh """
                         export BASE_URL="${BASE_URL}"
                         python3 -m pytest --junitxml=result-integration.xml test/integration/todoApiTest.py
                     """
                 }
-
                 junit 'result-integration.xml'
             }
         }
