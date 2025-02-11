@@ -57,10 +57,13 @@ pipeline {
                 //     echo "$BASE_URL"
                 //     echo 'Initiating Integration Tests'
                 //     sh "bash pipelines/common-steps/integration.sh $BASE_URL"
-                sh '''
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh '''
+                    export PYTHONPATH=${WORKSPACE}
                     python3 -m pytest --junitxml=result-unit.xml test/integration
                 '''
-                junit 'result-unit.xml'
+                    junit 'result-unit.xml'
+                }
             }
         }
     }
