@@ -70,7 +70,7 @@ pipeline {
                 // '''
                 }
 
-                junit 'result-unit.xml'
+                junit 'result-integration.xml'
             }
         }
     }
