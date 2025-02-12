@@ -1,0 +1,86 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Get Code') {
+            steps {
+                cleanWs()
+                git branch: 'master', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                script {
+                    logEnvironment()
+                }
+                stash name:'get_code', includes:'**'
+            }
+        }
+
+        stage('Deploy') {
+            script {
+                    logEnvironment()
+            }
+            steps {
+                    sh '''
+                    export AWS_REGION=us-east-1
+                    export AWS_DEFAULT_REGION=us-east-1
+                    rm -rf .aws-sam samconfig.toml
+                    sam build
+                    sam validate --region us-east-1
+                    sam deploy --stack-name todo-list-aws-production \
+                       --resolve-s3 \
+                       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+                       --region us-east-1 \
+                       --parameter-overrides Stage="production" \
+                       --no-confirm-changeset \
+                       --force-upload \
+                       --no-fail-on-empty-changeset
+                       aws cloudformation describe-stacks --stack-name todo-list-aws-production \
+                        --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' \
+                        --region us-east-1 --output text > api_url.txt
+                '''
+                stash name: 'api_url', includes: 'api_url.txt'
+            }
+        }
+
+        stage('Rest Tests') {
+            agent { label 'agent1' }
+            unstash name: 'get_code'
+            unstash name: 'api_url'
+            steps {
+                script {
+                    logEnvironment()
+                    def BASE_URL = readFile('api_url.txt').trim()
+                    echo "API Base URL: ${BASE_URL}"
+                    echo 'Initiating Integration Tests'
+                    sh """
+                        export BASE_URL="${BASE_URL}"
+                        python3 -m pytest --junitxml=result-integration.xml -m "readonly" test/integration/todoApiTest.py
+                    """
+                }
+                junit 'result-integration.xml'
+                stash name: 'integration_results', includes: 'result-integration.xml'
+            }
+        }
+    }
+    post {
+        always {
+            unstash 'integration_results'
+            archiveArtifacts artifacts: '**/*.xml', fingerprint: true
+            echo 'Artifacts archived.'
+        }
+        success {
+            cleanWs()
+            echo 'Cleaning done'
+            echo 'Pipeline completed successfully!'
+        }
+        failure {
+            cleanWs()
+            echo 'Cleaning done'
+            echo 'Pipeline failed.'
+        }
+    }
+}
+def logEnvironment() {
+    bat 'whoami'
+    bat 'hostname'
+    bat 'echo %WORKSPACE%'
+    bat 'dir'
+}
