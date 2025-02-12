@@ -65,20 +65,23 @@ pipeline {
                        --no-confirm-changeset \
                        --force-upload \
                        --no-fail-on-empty-changeset
+                       aws cloudformation describe-stacks --stack-name todo-list-aws-staging \
+                        --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' \
+                        --region us-east-1 --output text > api_url.txt
                 '''
+                stash name: 'api_url', includes: 'api_url.txt'
             }
         }
 
         stage('Rest Tests') {
             agent { label 'agent2' }
             unstash name: 'get_code'
-            script {
-                    logEnvironment()
-            }
+            unstash name: 'api_url'
+
             steps {
                 script {
-                    def BASE_URL = sh(script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                    returnStdout: true).trim()
+                    logEnvironment()
+                    def BASE_URL = readFile('api_url.txt').trim()
                     echo "API Base URL: ${BASE_URL}"
                     echo 'Initiating Integration Tests'
                     sh """
