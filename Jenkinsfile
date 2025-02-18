@@ -5,25 +5,38 @@ pipeline {
         stage('Get Code') {
             steps {
                 git branch: 'master', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                sh '''
+                wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/production/samconfig.toml -O samconfig.toml
+                '''
             }
         }
 
         stage('Deploy') {
+            // steps {
+            //         sh '''
+            //         export AWS_REGION=us-east-1
+            //         export AWS_DEFAULT_REGION=us-east-1
+            //         rm -rf .aws-sam samconfig.toml
+            //         sam build
+            //         sam validate --region us-east-1
+            //         sam deploy --stack-name todo-list-aws-production \
+            //            --resolve-s3 \
+            //            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
+            //            --region us-east-1 \
+            //            --parameter-overrides Stage="production" \
+            //            --no-confirm-changeset \
+            //            --force-upload \
+            //            --no-fail-on-empty-changeset
+            //     '''
+            // }
             steps {
-                    sh '''
-                    export AWS_REGION=us-east-1
-                    export AWS_DEFAULT_REGION=us-east-1
-                    rm -rf .aws-sam samconfig.toml
-                    sam build
-                    sam validate --region us-east-1
-                    sam deploy --stack-name todo-list-aws-production \
-                       --resolve-s3 \
-                       --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-                       --region us-east-1 \
-                       --parameter-overrides Stage="production" \
-                       --no-confirm-changeset \
-                       --force-upload \
-                       --no-fail-on-empty-changeset
+                sh '''
+                export AWS_REGION=us-east-1
+                export AWS_DEFAULT_REGION=us-east-1
+                rm -rf .aws-sam
+                sam build
+                sam validate --region us-east-1
+                sam deploy --config-env production --no-confirm-changeset --force-upload --no-fail-on-empty-changeset
                 '''
             }
         }
