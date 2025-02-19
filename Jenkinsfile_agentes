@@ -133,8 +133,8 @@ pipeline {
 }
 
 def logEnvironment() {
-    bat 'whoami'
-    bat 'hostname'
-    bat 'echo %WORKSPACE%'
-    bat 'dir'
+    sh 'whoami'
+    sh 'hostname'
+    sh 'echo %WORKSPACE%'
+    sh 'dir'
 }
