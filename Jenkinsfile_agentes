@@ -9,7 +9,7 @@ pipeline {
                 script {
                     logEnvironment()
                 }
-                stash name:'get_code', includes:'**'
+                stash name: 'get_code', includes: '**'
             }
         }
 
@@ -17,11 +17,11 @@ pipeline {
             parallel {
                 stage('Flake8') {
                     agent { label 'agent1' }
-                    script {
-                        logEnvironment()
-                    }
                     steps {
-                        unstash name: 'get_code'   
+                        unstash name: 'get_code'
+                        script {
+                            logEnvironment()
+                        }
                         sh '''
                             export PYTHONPATH=${WORKSPACE}
                             python3 -m flake8 --exit-zero --format=pylint src >flake8.out
@@ -32,11 +32,11 @@ pipeline {
 
                 stage('Security') {
                     agent { label 'agent1' }
-                    script {
-                        logEnvironment()
-                    }
                     steps {
                         unstash name: 'get_code'
+                        script {
+                            logEnvironment()
+                        }
                         sh '''
                             python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
                         '''
@@ -47,11 +47,11 @@ pipeline {
         }
 
         stage('Deploy') {
-            script {
-                    logEnvironment()
-            }
             steps {
-                    sh '''
+                script {
+                    logEnvironment()
+                }
+                sh '''
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
                     rm -rf .aws-sam samconfig.toml
@@ -75,7 +75,6 @@ pipeline {
 
         stage('Rest Tests') {
             agent { label 'agent2' }
-
             steps {
                 unstash name: 'get_code'
                 unstash name: 'api_url'
@@ -93,6 +92,7 @@ pipeline {
                 stash name: 'integration_results', includes: 'result-integration.xml'
             }
         }
+
         stage('Promote') {
             steps {
                 script {
@@ -112,6 +112,7 @@ pipeline {
             }
         }
     }
+
     post {
         always {
             unstash 'integration_results'
@@ -130,6 +131,7 @@ pipeline {
         }
     }
 }
+
 def logEnvironment() {
     bat 'whoami'
     bat 'hostname'
