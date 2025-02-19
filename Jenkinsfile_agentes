@@ -42,9 +42,9 @@ pipeline {
 
         stage('Rest Tests') {
             agent { label 'agent1' }
-            unstash name: 'get_code'
-            unstash name: 'api_url'
             steps {
+                unstash name: 'get_code'
+                unstash name: 'api_url'
                 script {
                     logEnvironment()
                     def BASE_URL = readFile('api_url.txt').trim()
