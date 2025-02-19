@@ -4,10 +4,32 @@ pipeline {
     stages {
         stage('Get Code') {
             steps {
-                git branch: 'master', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                git branch: 'dev', url: 'https://github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
                 sh '''
-                wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/production/samconfig.toml -O samconfig.toml
+                wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
                 '''
+            }
+        }
+
+        stage('Static Tests') {
+            parallel {
+                stage('Flake8') {
+                    steps {
+                        sh '''
+                            python3 -m flake8 --exit-zero --format=pylint src >flake8.out
+                        '''
+                        recordIssues tools: [flake8(name: 'Flake8', pattern: 'flake8.out')]
+                    }
+                }
+
+                stage('Security') {
+                    steps {
+                        sh '''
+                            python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
+                        '''
+                        recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
+                    }
+                }
             }
         }
 
@@ -19,11 +41,11 @@ pipeline {
             //         rm -rf .aws-sam samconfig.toml
             //         sam build
             //         sam validate --region us-east-1
-            //         sam deploy --stack-name todo-list-aws-production \
+            //         sam deploy --stack-name todo-list-aws-staging \
             //            --resolve-s3 \
             //            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
             //            --region us-east-1 \
-            //            --parameter-overrides Stage="production" \
+            //            --parameter-overrides Stage="staging" \
             //            --no-confirm-changeset \
             //            --force-upload \
             //            --no-fail-on-empty-changeset
@@ -36,7 +58,7 @@ pipeline {
                 rm -rf .aws-sam
                 sam build
                 sam validate --region us-east-1
-                sam deploy --config-env production --no-confirm-changeset --force-upload --no-fail-on-empty-changeset
+                sam deploy --config-env staging --no-confirm-changeset --force-upload --no-fail-on-empty-changeset
                 '''
             }
         }
@@ -54,6 +76,31 @@ pipeline {
                     """
                 }
                 junit 'result-integration.xml'
+            }
+        }
+        stage('Promote') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
+                        sh '''
+                            git config user.email "jenkins@ci.local CP1.4"
+                            git config user.name "Jenkins CI Cedric CP1.4"
+                            git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                            git checkout master
+                            git pull origin master
+                            git merge --no-ff dev -m "Promoting version from dev to master" || {
+                                echo "Merge conflict detected. Attempting to resolve automatically."
+                                git merge --abort
+                                git merge --strategy-option theirs dev || {
+                                    echo "Automatic resolution failed. Aborting merge."
+                                    git merge --abort
+                                    exit 1
+                                }
+                            }
+                            git push origin master
+                        '''
+                    }
+                }
             }
         }
     }
