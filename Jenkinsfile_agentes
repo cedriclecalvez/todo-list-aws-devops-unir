@@ -17,11 +17,11 @@ pipeline {
             parallel {
                 stage('Flake8') {
                     agent { label 'agent1' }
-                    unstash name: 'get_code'
                     script {
                         logEnvironment()
                     }
                     steps {
+                        unstash name: 'get_code'   
                         sh '''
                             export PYTHONPATH=${WORKSPACE}
                             python3 -m flake8 --exit-zero --format=pylint src >flake8.out
@@ -32,11 +32,11 @@ pipeline {
 
                 stage('Security') {
                     agent { label 'agent1' }
-                    unstash name: 'get_code'
                     script {
                         logEnvironment()
                     }
                     steps {
+                        unstash name: 'get_code'
                         sh '''
                             python3 -m bandit --exit-zero -r . -f custom -o bandit.out --severity-level medium --msg-template "{abspath}:{line}: [{test_id}] {msg}"
                         '''
@@ -75,10 +75,10 @@ pipeline {
 
         stage('Rest Tests') {
             agent { label 'agent2' }
-            unstash name: 'get_code'
-            unstash name: 'api_url'
 
             steps {
+                unstash name: 'get_code'
+                unstash name: 'api_url'
                 script {
                     logEnvironment()
                     def BASE_URL = readFile('api_url.txt').trim()
