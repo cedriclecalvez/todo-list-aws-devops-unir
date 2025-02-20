@@ -92,7 +92,6 @@ pipeline {
                             git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
                             git fetch --all
                             git checkout -b master
-                            git pull origin master --no-rebase
                             git merge --no-ff dev -m "Promoting version from dev to master" || {
                                 echo "Merge conflict detected. Attempting to resolve automatically."
                                 git merge --abort
@@ -102,7 +101,7 @@ pipeline {
                                     exit 1
                                 }
                             }
-                            git push origin master
+                            git push --force origin master
                         '''
                     }
                 }
