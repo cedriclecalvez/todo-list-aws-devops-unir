@@ -16,6 +16,7 @@ pipeline {
                             git fetch --all
                             git checkout dev
                         '''
+
                         sh '''
                             wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
                         '''
