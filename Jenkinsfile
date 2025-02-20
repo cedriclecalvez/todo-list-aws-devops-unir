@@ -96,7 +96,7 @@ pipeline {
                             git merge --no-ff dev -m "Promoting version from dev to master" || {
                                 echo "Merge conflict detected. Attempting to resolve automatically."
                                 git merge --abort
-                                git merge --strategy-option theirs dev || {
+                                git merge -s recursive - X theirs dev || {
                                     echo "Automatic resolution failed. Aborting merge."
                                     git merge --abort
                                     exit 1
