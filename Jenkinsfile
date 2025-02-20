@@ -6,9 +6,20 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
-                        git branch: 'dev', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                        // git branch: 'dev', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                        // sh '''
+                        // wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
+                        // '''
                         sh '''
-                        wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
+                            git clone https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                            cd todo-list-aws-devops-unir
+                            git fetch --all
+                            git checkout dev
+                            git branch -a
+                        '''
+
+                        sh '''
+                            wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
                         '''
                     }
                 }
@@ -38,23 +49,6 @@ pipeline {
         }
 
         stage('Deploy') {
-            // steps {
-            //         sh '''
-            //         export AWS_REGION=us-east-1
-            //         export AWS_DEFAULT_REGION=us-east-1
-            //         rm -rf .aws-sam samconfig.toml
-            //         sam build
-            //         sam validate --region us-east-1
-            //         sam deploy --stack-name todo-list-aws-staging \
-            //            --resolve-s3 \
-            //            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-            //            --region us-east-1 \
-            //            --parameter-overrides Stage="staging" \
-            //            --no-confirm-changeset \
-            //            --force-upload \
-            //            --no-fail-on-empty-changeset
-            //     '''
-            // }
             steps {
                 sh '''
                 export AWS_REGION=us-east-1
@@ -85,25 +79,26 @@ pipeline {
         stage('Promote') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
-                        sh '''
-                            git config user.email "jenkins@ci.local CP1.4"
-                            git config user.name "Jenkins CI Cedric CP1.4"
-                            git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
-                            git fetch --all
-                            git checkout -b master
-                            git merge --no-ff dev -m "Promoting version from dev to master" || {
-                                echo "Merge conflict detected. Attempting to resolve automatically."
+                    sh '''
+                        cd todo-list-aws-devops-unir
+                        git config user.email "jenkins@ci.local CP1.4"
+                        git config user.name "Jenkins CI Cedric CP1.4"
+                        git fetch --all
+                        git branch -a
+                        git checkout master
+                        git pull origin master
+                        git branch -a
+                        git merge --no-ff dev -m "Promoting version from dev to master" || {
+                            echo "Merge conflict detected. Attempting to resolve automatically."
+                            git merge --abort
+                            git merge -s recursive -X theirs dev || {
+                                echo "Automatic resolution failed. Aborting merge."
                                 git merge --abort
-                                git merge -s recursive -X theirs dev || {
-                                    echo "Automatic resolution failed. Aborting merge."
-                                    git merge --abort
-                                    exit 1
-                                }
+                                exit 1
                             }
-                            git push --force origin master
-                        '''
-                    }
+                        }
+                        git push --force origin master
+                    '''
                 }
             }
         }
