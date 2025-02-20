@@ -13,5 +13,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 add something to launch CI/CD:
 
-- test1
-- test2
+new test
