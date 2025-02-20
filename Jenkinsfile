@@ -80,17 +80,13 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        cd todo-list-aws-devops-unir
                         git config user.email "jenkins@ci.local CP1.4"
                         git config user.name "Jenkins CI Cedric CP1.4"
                         git fetch --all
                         git branch -a
-                        if git show-ref --verify --quiet refs/heads/master; then
-                            git checkout master
-                            git pull origin master
-                        else
-                            git checkout -b master
-                            git pull origin master
-                        fi
+                        git checkout master
+                        git pull origin master
                         git branch -a
                         git merge --no-ff dev -m "Promoting version from dev to master" || {
                             echo "Merge conflict detected. Attempting to resolve automatically."
