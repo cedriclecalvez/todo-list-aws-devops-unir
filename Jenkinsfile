@@ -15,6 +15,7 @@ pipeline {
                             cd todo-list-aws-devops-unir
                             git fetch --all
                             git checkout dev
+                            git branch -a
                         '''
 
                         sh '''
@@ -48,23 +49,6 @@ pipeline {
         }
 
         stage('Deploy') {
-            // steps {
-            //         sh '''
-            //         export AWS_REGION=us-east-1
-            //         export AWS_DEFAULT_REGION=us-east-1
-            //         rm -rf .aws-sam samconfig.toml
-            //         sam build
-            //         sam validate --region us-east-1
-            //         sam deploy --stack-name todo-list-aws-staging \
-            //            --resolve-s3 \
-            //            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM CAPABILITY_AUTO_EXPAND \
-            //            --region us-east-1 \
-            //            --parameter-overrides Stage="staging" \
-            //            --no-confirm-changeset \
-            //            --force-upload \
-            //            --no-fail-on-empty-changeset
-            //     '''
-            // }
             steps {
                 sh '''
                 export AWS_REGION=us-east-1
@@ -100,7 +84,8 @@ pipeline {
                         git config user.name "Jenkins CI Cedric CP1.4"
                         git branch -a
                         git fetch --all
-                        git checkout master
+                        git checkout -b master
+                        git branch -a
                         git merge --no-ff dev -m "Promoting version from dev to master" || {
                             echo "Merge conflict detected. Attempting to resolve automatically."
                             git merge --abort
