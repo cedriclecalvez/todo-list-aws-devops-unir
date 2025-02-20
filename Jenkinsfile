@@ -4,13 +4,13 @@ pipeline {
     stages {
         stage('Get Code') {
             steps {
-                script{
+                script {
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
                         git branch: 'dev', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
-                    sh '''
-                    wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
-                    '''
-
+                        sh '''
+                        wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
+                        '''
+                    }
                 }
             }
         }
