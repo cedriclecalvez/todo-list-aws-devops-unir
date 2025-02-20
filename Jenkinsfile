@@ -6,9 +6,18 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
-                        git branch: 'dev', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                        // git branch: 'dev', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
+                        // sh '''
+                        // wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
+                        // '''
                         sh '''
-                        wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
+                            git clone https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                            cd todo-list-aws-devops-unir
+                            git fetch --all
+                            git checkout dev
+                        '''
+                        sh '''
+                            wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/staging/samconfig.toml -O samconfig.toml
                         '''
                     }
                 }
@@ -85,13 +94,13 @@ pipeline {
         stage('Promote') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
                         sh '''
                             git config user.email "jenkins@ci.local CP1.4"
                             git config user.name "Jenkins CI Cedric CP1.4"
                             git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                            git branch -a
                             git fetch --all
-                            git checkout -b master
+                            git checkout master
                             git merge --no-ff dev -m "Promoting version from dev to master" || {
                                 echo "Merge conflict detected. Attempting to resolve automatically."
                                 git merge --abort
@@ -103,7 +112,6 @@ pipeline {
                             }
                             git push --force origin master
                         '''
-                    }
                 }
             }
         }
