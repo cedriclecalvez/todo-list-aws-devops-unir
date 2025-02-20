@@ -94,24 +94,24 @@ pipeline {
         stage('Promote') {
             steps {
                 script {
-                        sh '''
-                            git config user.email "jenkins@ci.local CP1.4"
-                            git config user.name "Jenkins CI Cedric CP1.4"
-                            git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
-                            git branch -a
-                            git fetch --all
-                            git checkout master
-                            git merge --no-ff dev -m "Promoting version from dev to master" || {
-                                echo "Merge conflict detected. Attempting to resolve automatically."
+                    sh '''
+                        git config user.email "jenkins@ci.local CP1.4"
+                        git config user.name "Jenkins CI Cedric CP1.4"
+                        git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
+                        git branch -a
+                        git fetch --all
+                        git checkout master
+                        git merge --no-ff dev -m "Promoting version from dev to master" || {
+                            echo "Merge conflict detected. Attempting to resolve automatically."
+                            git merge --abort
+                            git merge -s recursive -X theirs dev || {
+                                echo "Automatic resolution failed. Aborting merge."
                                 git merge --abort
-                                git merge -s recursive -X theirs dev || {
-                                    echo "Automatic resolution failed. Aborting merge."
-                                    git merge --abort
-                                    exit 1
-                                }
+                                exit 1
                             }
-                            git push --force origin master
-                        '''
+                        }
+                        git push --force origin master
+                    '''
                 }
             }
         }
