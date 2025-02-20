@@ -97,7 +97,6 @@ pipeline {
                     sh '''
                         git config user.email "jenkins@ci.local CP1.4"
                         git config user.name "Jenkins CI Cedric CP1.4"
-                        git remote set-url origin https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
                         git branch -a
                         git fetch --all
                         git checkout master
