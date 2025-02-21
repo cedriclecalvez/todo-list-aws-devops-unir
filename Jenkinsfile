@@ -31,7 +31,7 @@ pipeline {
                     sh '''
                     export AWS_REGION=us-east-1
                     export AWS_DEFAULT_REGION=us-east-1
-                    rm -rf .aws-sam samconfig.toml
+                    rm -rf .aws-sam
                     sam build
                     sam validate --region us-east-1
                     sam deploy --config-env production --no-confirm-changeset --force-upload --no-fail-on-empty-changeset
