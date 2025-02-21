@@ -6,10 +6,6 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'GITHUB_TOKEN', variable: 'GITHUB_PAT')]) {
-                        // git branch: 'master', url: 'https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git'
-                        // sh '''
-                        // wget https://raw.githubusercontent.com/cedriclecalvez/todo-list-aws-config_devops-unir/production/samconfig.toml -O samconfig.toml
-                        // '''
                         sh '''
                             git clone https://$GITHUB_PAT@github.com/cedriclecalvez/todo-list-aws-devops-unir.git
                             cd todo-list-aws-devops-unir
